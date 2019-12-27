@@ -27,4 +27,6 @@ public class HuffmanDecoder {
     public HuffmanCodeTable restoreTable() throws IOException {
        return codeTableRestorer.restore();
     }
+
+
 }
