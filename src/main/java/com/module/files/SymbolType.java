@@ -1,5 +1,5 @@
 package com.module.files;
 
 public enum SymbolType {
-    BYTE,WORD,DWORD;
+    BYTE, WORD, DWORD;
 }

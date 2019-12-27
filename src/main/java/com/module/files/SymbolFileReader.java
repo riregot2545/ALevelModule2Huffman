@@ -11,8 +11,9 @@ public class SymbolFileReader {
     private Path pathToFile;
     private int symbolSize;
     private InputStream inputStream;
+
     public SymbolFileReader(SymbolType symbolType, Path pathToFile) throws FileNotFoundException {
-        switch (symbolType){
+        switch (symbolType) {
             case BYTE:
                 symbolSize = 1;
                 break;
@@ -23,15 +24,17 @@ public class SymbolFileReader {
                 symbolSize = 4;
                 break;
         }
-        this.inputStream = new BufferedInputStream(new FileInputStream(pathToFile.toFile()));;
+        this.inputStream = new BufferedInputStream(new FileInputStream(pathToFile.toFile()));
+        this.pathToFile = pathToFile;
     }
 
     public int readNextSymbol() throws IOException {
-        if(inputStream.available() > 0) {
+        if (inputStream.available() > 0) {
             byte[] bytes = new byte[symbolSize];
             inputStream.read(bytes);
             return BitUtils.merge(bytes);
-        }else return -1;
+        } else
+            return Integer.MIN_VALUE;
     }
 
     public void reopenInputStream() throws FileNotFoundException {

@@ -13,7 +13,7 @@ public class BitFileWriter {
     private BufferedOutputStream bufferedOutputStream;
 
     public BitFileWriter(Path pathToFile) throws FileNotFoundException {
-        this.bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(pathToFile.toFile(),true));
+        this.bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(pathToFile.toFile(), true));
     }
 
     public void appendHuffmanCodeToFile(int valueToAppend, int codeLength, int remainingLength) throws IOException {

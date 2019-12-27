@@ -5,7 +5,6 @@ import com.module.files.CodeTableWriter;
 import com.module.files.SymbolFileReader;
 import com.module.files.SymbolType;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,9 +19,9 @@ public class HuffmanEncoder {
     private SymbolFileReader symbolFileReader;
     private CodeTableWriter codeTableWriter;
 
-    public HuffmanEncoder(Path pathToFile) throws FileNotFoundException {
-        this.symbolFileReader = new SymbolFileReader(SymbolType.BYTE,pathToFile);
-        Path pathToOutput =  Paths.get(pathToFile.getFileName().toString().split("\\.")[0] + ".hf");
+    public HuffmanEncoder(Path pathToFile) throws IOException {
+        this.symbolFileReader = new SymbolFileReader(SymbolType.BYTE, pathToFile);
+        Path pathToOutput = Paths.get(pathToFile.getFileName().toString().split("\\.")[0] + ".hf");
 
         this.bitFileWriter = new BitFileWriter(pathToOutput);
         this.codeTableWriter = new CodeTableWriter(pathToOutput);
@@ -30,10 +29,10 @@ public class HuffmanEncoder {
 
     public void encode() throws IOException {
         buildFrequencyTable();
-        makeTreeFromFrequencyTable();
         HuffmanCodeTree tree = makeTreeFromFrequencyTable();
         HuffmanCodeTable codeTable = new HuffmanCodeTable(tree.walkAndMap());
-        saveCodeTable(codeTable);
+        saveCodeTableInSingleFile(codeTable);
+        //saveCodeTableInSeparatelyFile(codeTable);
         makeCodedFile(codeTable);
     }
 
@@ -41,25 +40,24 @@ public class HuffmanEncoder {
         frequencyTable = new FrequencyTable();
 
         int nextSymbol;
-        while ((nextSymbol = symbolFileReader.readNextSymbol())>0) {
+        while ((nextSymbol = symbolFileReader.readNextSymbol()) != Integer.MIN_VALUE) {
             frequencyTable.append(nextSymbol);
         }
-        placeEOF(frequencyTable);
     }
 
-    public void placeEOF(FrequencyTable frequencyTable){
-        for(int i=0;i<256;i++) {
+    public int getEOFOriginal(FrequencyTable frequencyTable) {
+        for (int i = 0; i < 256; i++) {
             int finalI = i;
-            if(frequencyTable.getFrequencies().stream().noneMatch(item->item.symbol == finalI))
-            {
-                frequencyTable.append(i);
-                break;
+            if (frequencyTable.getFrequencies().stream().noneMatch(item -> item.symbol == finalI)) {
+                return i;
             }
         }
+        throw new IllegalStateException("Can't find original code for eof");
     }
 
-    public HuffmanCodeTree makeTreeFromFrequencyTable(){
+    public HuffmanCodeTree makeTreeFromFrequencyTable() {
         PriorityQueue<TreeNode> priorityQueue = frequencyTable.toQueueOfTreeNodes();
+        priorityQueue.add(new TreeNode(1, getEOFOriginal(frequencyTable)));
         while (priorityQueue.size() != 1) {
             TreeNode lowestNode = priorityQueue.poll();
             TreeNode pairLowestNode = priorityQueue.poll();
@@ -76,16 +74,22 @@ public class HuffmanEncoder {
     public void makeCodedFile(HuffmanCodeTable codeTable) throws IOException {
         int nextSymbol;
         symbolFileReader.reopenInputStream();
-        while ((nextSymbol = symbolFileReader.readNextSymbol())>0){
+        int i=0;
+        while ((nextSymbol = symbolFileReader.readNextSymbol()) != Integer.MIN_VALUE) {
             HuffmanCode huffmanCode = codeTable.getBySymbol(nextSymbol);
             bitFileWriter.appendHuffmanCodeToFile(huffmanCode.code, huffmanCode.length, huffmanCode.length);
+            i++;
         }
-        HuffmanCode eofCode = codeTable.getTable().get(codeTable.getTable().size()-1);
-        bitFileWriter.appendHuffmanCodeToFile(eofCode.code,eofCode.length,eofCode.length);
+        HuffmanCode eofCode = codeTable.getTable().get(codeTable.getTable().size() - 1);
+        bitFileWriter.appendHuffmanCodeToFile(eofCode.code, eofCode.length, eofCode.length);
         bitFileWriter.flushAndClose();
     }
 
-    public void saveCodeTable(HuffmanCodeTable codeTable) throws IOException {
-        codeTableWriter.write(codeTable);
+    public void saveCodeTableInSingleFile(HuffmanCodeTable codeTable) throws IOException {
+        codeTableWriter.writeInSingleFile(codeTable);
+    }
+
+    public void saveCodeTableInSeparatelyFile(HuffmanCodeTable codeTable) throws IOException {
+        codeTableWriter.writeInSeparatelyFile(codeTable);
     }
 }

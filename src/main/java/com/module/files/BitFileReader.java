@@ -18,7 +18,7 @@ public class BitFileReader {
     }
 
     public int next(int count) throws IOException {
-        if(count<=Integer.SIZE) {
+        if (count <= Integer.SIZE) {
             int result = 0;
             for (int i = 0; i < count; i++) {
                 result = BitUtils.merge(result, (byte) next());
@@ -27,17 +27,18 @@ public class BitFileReader {
         }
         throw new IllegalArgumentException("Integer overflow on filling");
     }
+
     public int next() throws IOException {
         if (position != -1) {
-            int result = BitUtils.getBit(buffer,position);
+            int result = BitUtils.getBit(buffer, position);
             position--;
             return result;
         } else {
-            if(appendToBuffer()>0) {
+            if (appendToBuffer() > 0) {
                 position = 7;
                 buffer = input.read();
                 return next();
-            }else
+            } else
                 return -1;
         }
     }

@@ -21,12 +21,12 @@ public class BitUtils {
     }
 
     public static int merge(int container, int b) {
-        if(
-                Integer.numberOfLeadingZeros(container)+
-                        (Integer.SIZE -Integer.numberOfLeadingZeros(b)) > Integer.SIZE)
+        if (
+                Integer.numberOfLeadingZeros(container) +
+                        (Integer.SIZE - Integer.numberOfLeadingZeros(b)) > Integer.SIZE)
             throw new IllegalArgumentException("Merge error, container can't poll value");
 
-        container = container << (Integer.SIZE -Integer.numberOfLeadingZeros(b));
+        container = container << (Integer.SIZE - Integer.numberOfLeadingZeros(b));
         container = container | b;
         return container;
     }
