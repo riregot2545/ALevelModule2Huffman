@@ -26,6 +26,7 @@ public class Application {
             if(extension.equals("hf")){
                 try {
                     huffmanDecoder = new HuffmanDecoder(fileToProc);
+                    logger.info("Starting decoding file: "+fileToProc.getFileName());
                     huffmanDecoder.decode();
                 } catch (IOException e) {
                     logger.error("Exception in HuffmanEncoder.Encode: "+e.getMessage());
@@ -34,6 +35,7 @@ public class Application {
             else {
                 try {
                     huffmanEncoder = new HuffmanEncoder(fileToProc);
+                    logger.info("Starting coding file: "+fileToProc.getFileName());
                     huffmanEncoder.encode();
                 } catch (IOException e) {
                     logger.error("Exception in HuffmanEncoder.Encode: "+e.getMessage());

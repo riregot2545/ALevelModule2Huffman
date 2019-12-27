@@ -1,21 +1,26 @@
 package com.module.huffman;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import com.module.files.BitFileReader;
+import com.module.files.SymbolFileReader;
+import com.module.files.SymbolType;
+
+import java.io.*;
 import java.nio.file.Path;
 
 public class HuffmanDecoder {
 
-    BufferedInputStream bufferedInputStream;
-
+    BitFileReader bitFileReader;
     public HuffmanDecoder(Path pathToFile) throws FileNotFoundException {
-
-        bufferedInputStream = new BufferedInputStream(new FileInputStream(pathToFile.toFile()));
-
+        bitFileReader = new BitFileReader(pathToFile);
     }
 
     public void decode() {
 
+    }
+
+    public HuffmanCodeTree restoreTree() throws IOException {
+        int byteOriginal = bitFileReader.next(8);
+        int byteCode = bitFileReader.next(8);
+        return null;
     }
 }

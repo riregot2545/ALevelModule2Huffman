@@ -6,6 +6,7 @@ import com.module.huffman.HuffmanCodeTable;
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Path;
 
 public class CodeTableWriter {
@@ -16,9 +17,10 @@ public class CodeTableWriter {
         this.bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(pathToFile.toFile(),true));
     }
 
-    public void write(HuffmanCodeTable codeTable){
+    public void write(HuffmanCodeTable codeTable) throws IOException {
         for (HuffmanCode huffmanCode : codeTable.getTable()) {
-            bufferedOutputStream.write();
+            bufferedOutputStream.write(huffmanCode.original);
+            bufferedOutputStream.write(huffmanCode.code);
         }
     }
 

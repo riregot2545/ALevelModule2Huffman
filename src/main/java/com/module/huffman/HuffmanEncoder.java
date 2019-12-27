@@ -1,6 +1,7 @@
 package com.module.huffman;
 
 import com.module.files.BitFileWriter;
+import com.module.files.CodeTableWriter;
 import com.module.files.SymbolFileReader;
 import com.module.files.SymbolType;
 
@@ -17,12 +18,14 @@ public class HuffmanEncoder {
 
     private BitFileWriter bitFileWriter;
     private SymbolFileReader symbolFileReader;
+    private CodeTableWriter codeTableWriter;
 
     public HuffmanEncoder(Path pathToFile) throws FileNotFoundException {
         this.symbolFileReader = new SymbolFileReader(SymbolType.BYTE,pathToFile);
         Path pathToOutput =  Paths.get(pathToFile.getFileName().toString().split("\\.")[0] + ".hf");
 
         this.bitFileWriter = new BitFileWriter(pathToOutput);
+        this.codeTableWriter = new CodeTableWriter(pathToOutput);
     }
 
     public void encode() throws IOException {
@@ -82,7 +85,7 @@ public class HuffmanEncoder {
         bitFileWriter.flushAndClose();
     }
 
-    public void saveCodeTable(HuffmanCodeTable codeTable){
-
+    public void saveCodeTable(HuffmanCodeTable codeTable) throws IOException {
+        codeTableWriter.write(codeTable);
     }
 }
