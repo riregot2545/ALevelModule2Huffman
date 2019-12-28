@@ -3,5 +3,6 @@ target
 lib
 *.iml
 %*
-.hf
-.dictionary
+*.hf
+*.dictionary
+Филипп Джеймс Исход
