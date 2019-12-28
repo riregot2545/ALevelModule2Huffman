@@ -14,7 +14,7 @@ public class CodeTableWriter {
     public CodeTableWriter(Path pathToFile) throws IOException {
         this.pathToFile = pathToFile;
         this.bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(pathToFile.toFile(), true));
-        clearFile();
+        createAndClearFile();
     }
 
     public void writeInSingleFile(HuffmanCodeTable codeTable) throws IOException {
@@ -31,7 +31,7 @@ public class CodeTableWriter {
             bufferedOutputStream.write(huffmanCode.code);
         }
     }
-    public void clearFile() throws IOException{
+    public void createAndClearFile() throws IOException{
         new PrintWriter(bufferedOutputStream).close();
     }
 }
