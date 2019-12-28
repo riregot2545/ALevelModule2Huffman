@@ -31,5 +31,6 @@ public class CodeTableRestorer {
                 break;
             huffmanCodeList.add(huffmanCode);
         }
+        return huffmanCodeTable;
     }
 }
