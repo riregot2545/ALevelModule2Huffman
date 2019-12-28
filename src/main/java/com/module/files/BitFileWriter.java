@@ -1,29 +1,35 @@
 package com.module.files;
 
-import java.io.BufferedOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import com.module.huffman.HuffmanCode;
+import com.module.utils.ByteUtils;
+
+import java.io.*;
 import java.nio.file.Path;
 
 public class BitFileWriter {
 
     private int dwordVal = 0;
-    private int bitsFree = Integer.SIZE;
+    private int bitsFree = Byte.SIZE;
     private BufferedOutputStream bufferedOutputStream;
 
-    public BitFileWriter(Path pathToFile) throws FileNotFoundException {
-        this.bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(pathToFile.toFile(), true));
+    public BitFileWriter(Path pathToFile, boolean append) throws FileNotFoundException {
+        this.bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(pathToFile.toFile(), append));
     }
 
-    public void appendHuffmanCodeToFile(int valueToAppend, int codeLength, int remainingLength) throws IOException {
+    public void appendHuffmanCodeToFile(HuffmanCode code) throws IOException {
+        appendValueToFile(code.code, code.length, code.length);
+    }
+
+    public void appendValueToFile(int valueToAppend, int codeLength, int remainingLength) throws IOException {
         if ((bitsFree - remainingLength) >= 0) {
             //buffer can eat valueToAppend
             dwordVal = dwordVal | valueToAppend;
             bitsFree -= remainingLength;
             if (bitsFree == 0) {
-                bufferedOutputStream.write(dwordVal);
-                bitsFree = Integer.SIZE;
+                byte[] bytes = ByteUtils.intToOneByteArray(dwordVal);
+                bufferedOutputStream.write(bytes);
+                dwordVal = 0;
+                bitsFree = Byte.SIZE;
             } else
                 dwordVal = dwordVal << bitsFree;
         } else {
@@ -32,14 +38,17 @@ public class BitFileWriter {
 
             dwordVal = dwordVal | valThatCanBePlaced;
 
+            byte[] bytes = ByteUtils.intToOneByteArray(dwordVal);
+
             valueToAppend = valueToAppend << (Integer.SIZE - codeLength + bitsFree);
             valueToAppend = valueToAppend >>> (Integer.SIZE - codeLength + bitsFree);
-            remainingLength -= bitsFree;
 
-            bufferedOutputStream.write(dwordVal);
-            bitsFree = Integer.SIZE;
+            remainingLength -= bitsFree;
+            bufferedOutputStream.write(bytes);
+            bitsFree = Byte.SIZE;
+            dwordVal = 0;
             if (remainingLength != 0)
-                appendHuffmanCodeToFile(valueToAppend, codeLength, remainingLength);
+                appendValueToFile(valueToAppend, codeLength, remainingLength);
         }
     }
 

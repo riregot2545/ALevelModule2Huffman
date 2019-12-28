@@ -1,32 +1,49 @@
 package com.module.huffman;
 
 import com.module.files.BitFileReader;
-import com.module.files.CodeTableRestorer;
-import com.module.files.SymbolFileReader;
-import com.module.files.SymbolType;
+import com.module.files.FrequencyTableReader;
+import com.module.files.HuffmanDecompressor;
+import com.module.utils.Constants;
+import com.module.utils.FilePathsUtils;
+import com.module.utils.FrequencyTableSavingType;
 
 import java.io.*;
 import java.nio.file.Path;
 
 public class HuffmanDecoder {
 
-    BitFileReader bitFileReader;
-    CodeTableRestorer codeTableRestorer;
+    private HuffmanDecompressor huffmanDecompressor;
+    private FrequencyTableReader frequencyTableReader;
+
+    private Path pathToSourceFile;
+    private Path pathToOutputFile;
 
     public HuffmanDecoder(Path pathToFile) throws FileNotFoundException {
-        bitFileReader = new BitFileReader(pathToFile);
-        codeTableRestorer = new CodeTableRestorer(pathToFile);
+        this.pathToSourceFile = pathToFile;
+        this.pathToOutputFile = FilePathsUtils.deleteExtension(pathToFile);
+
+        if(Constants.FREQUENCY_TABLE_SAVING_TYPE == FrequencyTableSavingType.IN_OUTPUT_FILE)
+            this.frequencyTableReader = new FrequencyTableReader(pathToFile);
+        else {
+            Path dictionaryPath = FilePathsUtils.switchExtension(pathToFile,"dictionary");
+            this.frequencyTableReader = new FrequencyTableReader(dictionaryPath);
+        }
     }
 
     public void decode() throws IOException {
-        HuffmanCodeTable huffmanCodeTable = restoreTable();
+        FrequencyTable frequencyTable = frequencyTableReader.readCoded();
+        HuffmanCodeTree huffmanCodeTree =
+                new HuffmanCodeTree.CodeTreeBuilder().fromFrequencyTable(frequencyTable);
+        huffmanCodeTree.walkAndMap();
+        HuffmanCodeTable codeTable = new HuffmanCodeTable(huffmanCodeTree.walkAndMap());
 
+        long seekOfTable;
+        if (Constants.FREQUENCY_TABLE_SAVING_TYPE == FrequencyTableSavingType.IN_OUTPUT_FILE)
+            seekOfTable = frequencyTable.countBytes();
+        else
+            seekOfTable = 0;
+        this.huffmanDecompressor = new HuffmanDecompressor(pathToSourceFile, pathToOutputFile, seekOfTable);
+        huffmanDecompressor.replaceHuffmanByOriginal(codeTable);
+        System.out.println();
     }
-
-
-    public HuffmanCodeTable restoreTable() throws IOException {
-       return codeTableRestorer.restore();
-    }
-
-
 }

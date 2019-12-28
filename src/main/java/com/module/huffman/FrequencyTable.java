@@ -1,5 +1,7 @@
 package com.module.huffman;
 
+import com.module.files.SymbolType;
+import com.module.utils.Constants;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -15,6 +17,13 @@ public class FrequencyTable {
         frequencies = new ArrayList<>();
     }
 
+    public int size() {
+        return frequencies.size();
+    }
+
+    public boolean containsSymbol(int symbol) {
+        return frequencies.stream().anyMatch(item -> item.symbol == symbol);
+    }
 
     public void append(int symbol) {
         if (frequencies.stream().anyMatch(item -> item.symbol == symbol)) {
@@ -24,17 +33,33 @@ public class FrequencyTable {
         }
     }
 
-    public PriorityQueue<TreeNode> toQueueOfTreeNodes() {
-        PriorityQueue<TreeNode> priorityQueue = new PriorityQueue<>(new Comparator<TreeNode>() {
-            @Override
-            public int compare(TreeNode o1, TreeNode o2) {
-                return Integer.compare(o1.count, o2.count);
-            }
-        });
-        frequencies.forEach(item -> priorityQueue.add(new TreeNode(item.frequency, item.symbol)));
-        return priorityQueue;
+    public void append(int symbol,int frequency) {
+        if (frequencies.stream().anyMatch(item -> item.symbol == symbol)) {
+            frequencies.stream().filter(item -> item.symbol == symbol).forEach(item -> item.frequency+=frequency);
+        } else {
+            SymbolFrequency symbolFrequency = new SymbolFrequency(symbol);
+            symbolFrequency.frequency = frequency;
+            frequencies.add(symbolFrequency);
+        }
     }
 
+    public long countBytes(){
+        SymbolType symbolType = Constants.READING_SYMBOL_TYPE;
+        int symbolSize = 1;
+        switch (symbolType) {
+            case BYTE:
+                symbolSize = 1;
+                break;
+            case WORD:
+                symbolSize = 2;
+                break;
+            case DWORD:
+                symbolSize = 4;
+                break;
+        }
+
+        return size()*symbolSize + size()*4;
+    }
 
     public static class SymbolFrequency {
         public int symbol;

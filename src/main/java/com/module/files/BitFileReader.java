@@ -7,14 +7,21 @@ import java.nio.file.Path;
 
 public class BitFileReader {
     private InputStream input;
-    private int buffer;
+    private byte[] buffer;
     private int position;
 
 
     public BitFileReader(Path pathToFile) throws FileNotFoundException {
         this.input = new BufferedInputStream(new FileInputStream(pathToFile.toFile()));
-        this.buffer = 0;
-        this.position = 7;
+        this.buffer = new byte[1];
+        this.position = -1;
+    }
+
+    public BitFileReader(Path pathToFile,long seek) throws IOException {
+        this(pathToFile);
+        for (long i = 0; i <seek ; i++) {
+            input.read();
+        }
     }
 
     public int next(int count) throws IOException {
@@ -30,13 +37,13 @@ public class BitFileReader {
 
     public int next() throws IOException {
         if (position != -1) {
-            int result = BitUtils.getBit(buffer, position);
+            int result = BitUtils.getBit(buffer[0], position);
             position--;
             return result;
         } else {
             if (appendToBuffer() > 0) {
                 position = 7;
-                buffer = input.read();
+                input.read(buffer);
                 return next();
             } else
                 return -1;
@@ -45,10 +52,8 @@ public class BitFileReader {
 
     private int appendToBuffer() throws IOException {
         if (input.available() > 0) {
-            byte[] bytes = new byte[1];
-            input.read(bytes);
-            buffer = BitUtils.merge(bytes);
-            return buffer;
+            input.read(buffer);
+            return 1;
         } else return -1;
     }
 }

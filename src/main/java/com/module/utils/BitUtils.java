@@ -31,7 +31,7 @@ public class BitUtils {
         return container;
     }
 
-    public static int getBit(int value, int position) {
+    public static int getBit(byte value, int position) {
         return (byte) (value >> position) & 1;
     }
 }

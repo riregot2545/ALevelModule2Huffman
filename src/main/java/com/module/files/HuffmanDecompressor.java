@@ -2,29 +2,40 @@ package com.module.files;
 
 import com.module.huffman.HuffmanCode;
 import com.module.huffman.HuffmanCodeTable;
+import com.module.utils.BitUtils;
+import com.module.utils.Constants;
 
 import java.io.*;
 import java.nio.file.Path;
+import java.util.Optional;
 
-public class HuffmanDecompresser {
+public class HuffmanDecompressor {
 
     private BitFileReader bitFileReader;
-    private BufferedOutputStream bufferedOutputStream;
+    private ByteFileWriter byteFileWriter;
 
-    public HuffmanDecompresser(Path pathToSource, Path pathToOutput, long seek) throws IOException {
+    public HuffmanDecompressor(Path pathToSource, Path pathToOutput, long seek) throws IOException {
         this.bitFileReader = new BitFileReader(pathToSource, seek);
-        this.bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(pathToOutput.toFile()));
+        this.byteFileWriter = new ByteFileWriter(Constants.READING_SYMBOL_TYPE, pathToOutput);
     }
 
     public void replaceHuffmanByOriginal(HuffmanCodeTable codeTable) throws IOException {
-        int nextSymbol;
-
-        while ((nextSymbol = bitFileReader.next())>0) {
-            HuffmanCode huffmanCode = codeTable.getBySymbol(nextSymbol);
-            bitFileWriter.appendHuffmanCodeToFile(huffmanCode);
+        HuffmanCode huffmanCode = new HuffmanCode();
+        int nextBit;
+        while ((nextBit = bitFileReader.next()) >=0) {
+            huffmanCode.appendBit(nextBit);
+            Optional<HuffmanCode> byCode = codeTable.getByCode(huffmanCode);
+            if (byCode.isPresent()) {
+                huffmanCode = byCode.get();
+                if (huffmanCode.code == codeTable.getEOF().code)
+                    break;
+                byteFileWriter.writeNextSymbol(huffmanCode.original);
+                huffmanCode = new HuffmanCode();
+            } else if (huffmanCode.length > codeTable.getMaxCodeLenght()) {
+                throw new IllegalStateException("Code " + Integer.toBinaryString(huffmanCode.code) + " with length "
+                        + huffmanCode.length + " is not exist in table.");
+            }
         }
-        HuffmanCode eofCode = codeTable.getTable().get(codeTable.getTable().size() - 1);
-        bitFileWriter.appendValueToFile(eofCode.code, eofCode.length, eofCode.length);
-        bitFileWriter.flushAndClose();
+        byteFileWriter.flushAndClose();
     }
 }

@@ -2,18 +2,19 @@ package com.module.files;
 
 import com.module.huffman.HuffmanCode;
 import com.module.huffman.HuffmanCodeTable;
+import com.module.utils.Constants;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class HuffmanEncodeWriter {
+public class HuffmanCompressor {
 
     private BitFileWriter bitFileWriter;
     private ByteFileReader byteFileReader;
 
-    public HuffmanEncodeWriter(Path pathToSource, Path pathToOutput, boolean append) throws FileNotFoundException {
-        this.byteFileReader = new ByteFileReader(SymbolType.BYTE, pathToSource);
+    public HuffmanCompressor(Path pathToSource, Path pathToOutput, boolean append) throws FileNotFoundException {
+        this.byteFileReader = new ByteFileReader(Constants.READING_SYMBOL_TYPE, pathToSource);
         this.bitFileWriter = new BitFileWriter(pathToOutput,append);
     }
 

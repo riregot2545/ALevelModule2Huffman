@@ -26,19 +26,19 @@ public class HuffmanCodeTable {
             throw new IllegalArgumentException("Symbol is not contained in huffman table");
     }
 
-    public HuffmanCode getByCode(int code, int length) {
-        Optional<HuffmanCode> first = table.stream().filter(huffmanCode -> huffmanCode.code == code
-                && huffmanCode.length == length).findFirst();
-        if (first.isPresent())
-            return first.get();
-        else
-            throw new IllegalArgumentException("Symbol is not contained in huffman table");
+    public Optional<HuffmanCode> getByCode(HuffmanCode hCode) {
+        return table.stream().filter(huffmanCode -> huffmanCode.code == hCode.code
+                && huffmanCode.length == hCode.length).findFirst();
     }
 
-    public int getMinCodeLenght() {
-        Optional<HuffmanCode> minOpt = table.stream().min(((o1, o2) -> Integer.compare(o1.length, o2.length)));
+    public int getMaxCodeLenght() {
+        Optional<HuffmanCode> minOpt = table.stream().max(((o1, o2) -> Integer.compare(o1.length, o2.length)));
         if (minOpt.isPresent())
             return minOpt.get().length;
         throw new IllegalArgumentException("Table is empty");
+    }
+
+    public HuffmanCode getEOF(){
+        return table.get(table.size()-1);
     }
 }

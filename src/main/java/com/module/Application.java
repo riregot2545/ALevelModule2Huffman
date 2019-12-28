@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static com.module.utils.FileParse.parseExtension;
+import static com.module.utils.FilePathsUtils.parseExtension;
 
 public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);

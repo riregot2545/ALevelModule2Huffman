@@ -1,8 +1,11 @@
 package com.module.files;
 
+import com.module.huffman.FrequencyTable;
 import com.module.huffman.HuffmanCode;
 import com.module.huffman.HuffmanCodeTable;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import com.module.utils.ByteUtils;
+import com.module.utils.Constants;
+import com.module.utils.FrequencyTableSavingType;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -10,27 +13,39 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CodeTableRestorer {
+public class FrequencyTableReader {
 
-    BitFileReader bitFileReader;
+    ByteFileReader byteFileReader;
 
-    public CodeTableRestorer(Path path) throws FileNotFoundException {
-        this.bitFileReader = new BitFileReader(path);
+    public FrequencyTableReader(Path path) throws FileNotFoundException {
+        this.byteFileReader = new ByteFileReader(Constants.READING_SYMBOL_TYPE,path);
     }
 
-    public HuffmanCodeTable restore() throws IOException {
-        HuffmanCodeTable huffmanCodeTable = new HuffmanCodeTable();
-        List<HuffmanCode> huffmanCodeList = new ArrayList<>();
+    public FrequencyTable readCoded() throws IOException {
+        FrequencyTable frequencyTable = new FrequencyTable();
         while (true) {
-            HuffmanCode huffmanCode = new HuffmanCode();
-
-            huffmanCode.original = bitFileReader.next(8);
-            huffmanCode.code = bitFileReader.next(8);
-
-            if(huffmanCodeList.stream().anyMatch(item->item.code==huffmanCode.code && huffmanCode.code!=0))
+            int nextSymbol = byteFileReader.readNextSymbol();
+            byte[] bytes = byteFileReader.readNextBytes(4);
+            if(Constants.FREQUENCY_TABLE_SAVING_TYPE == FrequencyTableSavingType.IN_OUTPUT_FILE) {
+                if (frequencyTable.containsSymbol(nextSymbol))
+                    break;
+            }else if(bytes.length!=4)
                 break;
-            huffmanCodeList.add(huffmanCode);
+
+
+            int nextFrequency = ByteUtils.byteArrayToInt(bytes);
+            frequencyTable.append(nextSymbol,nextFrequency);
         }
-        return huffmanCodeTable;
+        return frequencyTable;
+    }
+
+    public FrequencyTable makeFromSource() throws IOException {
+        FrequencyTable frequencyTable = new FrequencyTable();
+
+        int nextSymbol;
+        while ((nextSymbol = byteFileReader.readNextSymbol()) != Integer.MIN_VALUE) {
+            frequencyTable.append(nextSymbol);
+        }
+        return frequencyTable;
     }
 }

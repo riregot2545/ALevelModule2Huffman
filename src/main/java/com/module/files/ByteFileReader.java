@@ -6,13 +6,13 @@ import com.module.utils.BitUtils;
 import java.io.*;
 import java.nio.file.Path;
 
-public class SymbolFileReader {
+public class ByteFileReader {
 
     private Path pathToFile;
     private int symbolSize;
     private InputStream inputStream;
 
-    public SymbolFileReader(SymbolType symbolType, Path pathToFile) throws FileNotFoundException {
+    public ByteFileReader(SymbolType symbolType, Path pathToFile) throws FileNotFoundException {
         switch (symbolType) {
             case BYTE:
                 symbolSize = 1;
@@ -35,6 +35,16 @@ public class SymbolFileReader {
             return BitUtils.merge(bytes);
         } else
             return Integer.MIN_VALUE;
+    }
+
+    public byte[] readNextBytes(int nOfBytes) throws IOException {
+        if (inputStream.available() > 0) {
+            byte[] bytes = new byte[nOfBytes];
+            inputStream.read(bytes);
+            return bytes;
+        }
+        else
+            return new byte[nOfBytes-1];
     }
 
     public void reopenInputStream() throws FileNotFoundException {
